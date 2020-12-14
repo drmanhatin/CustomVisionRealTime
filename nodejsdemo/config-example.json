@@ -1,0 +1,16 @@
+{
+    "currentDeployment": "development",
+
+    "development": {
+
+        "express_port": 8080,
+        "custom_vision_key": "key",
+        "custom_vision_url": "url"
+
+    },
+
+    "production": {
+
+    }
+
+}

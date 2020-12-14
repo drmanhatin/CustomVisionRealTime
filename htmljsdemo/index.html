@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<title>Live Custom Vision Toolbox</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+  integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
+  crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+</head>
+
+<body style="background-color: #00A4EF">
+<div class="cointainer-fluid">
+
+<div class="row  m-0 p-0">
+
+
+    <div class="col-lg-9 col-md-12 m-0 p-0" >
+    
+    <video id="video" autoplay playsinline class="hidden"  style="max-height: 100vh; max-width: 100%; object-position: top left;  border-radius: 25px; "></video>
+   
+    </div>
+     <canvas class="hidden" id="cv1" style="position: absolute;  left:0px;z-index: 11;"  > </canvas>
+    <img id="image"/>
+
+    
+    <canvas class="hidden" id="cv2" style="display:none;"></canvas>
+    <canvas id="cv3" style="display: none;"></canvas>
+    
+
+
+    <div class="col-lg-3 col-md-12" style="z-index: 111">
+
+    <div class="col-12 " style=" background-color:white
+;   border-radius: 25px; padding: 20px; height: auto;
+">
+ <h4> Live Custom Vision Toolbox </h4>
+ <p>Select the right video source using the dropdown. Press pause to freeze a frame. Pause also shows you the image after compression + resizing. </p> 
+ <p> Higher quality means lower FPS, higher data usage, higher delay to receive labels </p> 
+      <button id="grabFrame" style="width: 100%; height: 100px; display: none;">Send photo to AZURE!</button>
+      <button id="takePhoto" style="width: 100px;height: 100px; display: none;">Take Photo</button>
+      <div class="select my-3">
+        <label for="videoSource" >Video source: </label><select id="videoSource"></select>
+      </div>
+
+
+      <form id="apiForm">
+
+
+
+
+
+          </label><br><br>
+
+
+        <label id="sizeLabel"> Reduce size by 0 times </label>
+
+        <input type="range" class="custom-range" id="customRange1" min=1 value=1 max=10 oninput ="changeSize(this.value)">
+            <label  id="compressLabel"> Compress factor: 0.9 </label>
+        <input type="range" class="custom-range" id="customRange1" max=1 min=0 step=0.1 value=0.9 oninput ="changeCompression(this.value)">
+          <input type="checkbox" value="pause" id="pausebutton" style="height: 200px; width: 50%; margin-right: 25%; margin-left: 25%;" class="" onclick="onFreezeChange(this)">
+          
+
+
+
+          <label for="pause" style="margin-right: 25%; margin-left: 25%; text-align: center; width: 50%" >Click To Pause</label><br><br>
+
+          <input type="checkbox" value="pause"  class="" onclick="onPauseAutomaticallyChange(this)" checked>
+
+          <label for="pause"  style="display: inline; margin-left: 5px;" >Pause automatically after 250 requests (avoid unforseen usage of the CustomVision API, RECOMMENDED)</label><br><br>
+
+
+          <input type="checkbox" value="pause"  class="" onclick="onSavePredictedImagesChange(this)" >
+
+          <label for="pause"  style="display: inline; margin-left: 5px;" >Save images after prediction by the CustomVision API. Images are available in the "Predictions" tab on the portal. </label><br><br>
+
+         
+
+
+          <label for="url"> Your CustomVision Endpoint URL </label>
+          <input type="text" id="url" oninput="setEndpointUrl(this.value)"> 
+
+          <label for="url"> Your CustomVision Endpoint Key </label>
+          <input type="text" id="key" oninput="setEndpointKey(this.value)"> 
+
+
+  <label for="url"> Save CustomVision Endpoint URL to  your browser </label>
+  <button onclick="saveEndpointUrl()"> Save Endpoint Url </button>
+
+            <label for="url"> Save CustomVision Endpoint Key to your browser (Potentially unsafe, key is saved unencryped in your browser) </label>
+ <button onclick="saveEndpointKey()"> Save Endpoint Key </button>
+
+    </div>
+
+
+    
+
+    <div class="col-12 " style=" background-color:white;
+;   border-radius: 25px; padding: 20px; margin-top: 15px; 
+">
+
+
+<h4> Data </h4>
+
+		<div id="result_view" />
+
+ <h5> Detected items</h5>
+     <table id="skutable"> 
+       
+       
+      </table>
+
+
+
+      <h5> Frames analyzed per second</h5>
+     <p id="fps"> 
+        </p>
+
+    </div>
+    
+   
+
+    
+
+
+    </div>
+     <div class="col-12 " style=" background-color:white;
+;   border-radius: 25px; padding: 20px; margin-top: 15px; 
+">
+ <h4> How it works</h4>
+
+<p> Your key is sent directly to the CustomVision API. We do not store or save your URL or Key on our server in any way. If you want to confirm this, check the sourcecode, <a href="/main.js"> this javascript file</a> , as it powers this site. You can also open the inspector tab of your browser 
+by pressing ctrl-shift-i and check the network tab to see the requests.</p>
+
+<p>You can host this toolkit for yourself if you want to. Check the github repository for instructions. </p>
+
+
+<p> To obtain your CustomVision endpoint URL + Key, complete the following steps: </p>
+<p> 1. Label your images  </p>
+<p> 2. Train your model </p>
+<p> 3. Go to the "Performance" tab in the CustomVision portal </p>
+<p> 4. Click the desired iteration of your model and click "Publish" in the top left corner </p>
+    
+<p>If you have any questions or remarks, please leave a comment on the <a href="https://github.com/drmanhatin/CustomVisionRealTime">github repository</a>  or send me a message through <a href="https://www.linkedin.com/in/victorsanner">LinkedIN</a></p>
+
+    </div>
+    </div>
+
+
+
+   
+</div>
+
+</div>
+
+
+
+  <script src="/main.js"></script>
+
+</body>
+</html>
+
+<style>
+
+* {
+  font-family: "Segoe UI" !important
+}
+
+
+</style>

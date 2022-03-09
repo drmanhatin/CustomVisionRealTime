@@ -25,7 +25,6 @@ To obtain your CustomVision endpoint URL + Key, complete the following steps (fr
 1. Click the desired iteration of your model and click "Publish" in the top left corner
 
 ## HTML/JS Demo
-Example available on https://customvision.victorsanner.nl
 
 Sends requests straight to the CustomVision API. **Endpoint + key are provided by the user. Use with care**. 
 
